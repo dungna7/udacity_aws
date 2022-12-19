@@ -32,21 +32,24 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
   //! END @TODO1
   app.get( "/filteredimage", async ( req, res ) => {
     var image_url = req.query.image_url; 
-    if(!image_url){
+    try {
+      if(!image_url){
+        console.log(image_url);
+        return res.status(400).send("bad request!");
+      };
       console.log(image_url);
-      res.send("invalid image url");
-      return;
-    };
-    console.log(image_url);
-    let fileName = await filterImageFromURL(image_url);
-    res.sendFile(fileName, function (err) {
-        if (err) {
-          console.log(err);
-        } else {
-            console.log('Sent:', fileName);
-        }
-    });
-    res.on('finish', () => deleteLocalFiles([fileName]));
+      let fileName = await filterImageFromURL(image_url);
+      res.sendFile(fileName, function (err) {
+          if (err) {
+            console.log(err);
+          } else {
+              console.log('Sent:', fileName);
+          }
+      });
+      res.on('finish', () => deleteLocalFiles([fileName]));
+    } catch (error) {
+      return res.status(500).send({error: 'Unable to process your request'});
+    }
   } );
 
   // Root Endpoint
